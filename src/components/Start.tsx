@@ -18,7 +18,7 @@ const StartPage = () => {
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
 
-        navigate('/signup');
+        navigate('/login');
     };
 
     return (
@@ -31,23 +31,16 @@ const StartPage = () => {
             <div style={styles.container}>
                 <div className='col-md-6' style={{ display: 'flex', flexDirection: 'column', width: '500px', justifyContent: 'center', alignItems: 'center' }}>
                     <h2 style={{ textAlign: 'center', margin: '0 0 20px 0', padding: '0', color: 'white', textShadow: '0 0 10px #fff', fontSize: '50px' }}>
-                        Body Mass Index
+                        Body Mass Index Calculator
                     </h2>
-                    <form onSubmit={handleSubmit} style={styles.form}>
+                    <p>
                         
-                        <input
-                            type="text"
-                            placeholder="Username"
-                            style={styles.input}
-                        />
-                        <button type="submit" style={styles.button}>
-                            Login
-                        </button>
-                    </form>
+                    </p>
                 </div>
             </div>
         </section>
     );
+
 }
 
 export default StartPage;

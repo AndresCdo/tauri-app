@@ -3,10 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { invoke } from "@tauri-apps/api/tauri";
 
 import "../App.css"
+
+const styles: { [key: string]: React.CSSProperties } = {
+  container: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' },
+  form: { display: 'flex', flexDirection: 'column', width: '300px' },
+  input: { margin: '10px 0', padding: '10px' },
+  button: { padding: '10px' }
+};
+
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const history = useNavigate();
+  const navigate = useNavigate();
 
   const handleUsernameChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
     // if (event.target.value.length > 12) {
@@ -51,7 +59,7 @@ const LoginPage = () => {
 
     // If login is successful, redirect to the homepage.
     if (isSuccess) {
-      history("/home?username=" + username);
+      navigate("/home?username=" + username);
     } else {
       alert("Login failed. Please try again.");
     }
@@ -71,28 +79,41 @@ const LoginPage = () => {
       <div className='air air2'></div>
       <div className='air air3'></div>
       <div className='air air4'></div>
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', width: '300px' }}>
-          <h2 style={{ textAlign: 'center', margin: '0 0 20px 0', padding: '0', color: 'white', textShadow: '0 0 10px #fff', fontSize: '50px' }}>Login</h2>
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={handleUsernameChange}
-            style={{ margin: '10px 0', padding: '10px' }}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={handlePasswordChange}
-            style={{ margin: '10px 0', padding: '10px' }}
-          />
-          <button type="submit" style={{ padding: '10px' }}>
-            Login
-          </button>
-        </form>
-      </div>
+      <div style={styles.container}>
+                <div className='col-md-6' style={{ display: 'flex', flexDirection: 'column', width: '500px', justifyContent: 'center', alignItems: 'center' }}>
+                    <h2 style={{ textAlign: 'center', margin: '0 0 20px 0', padding: '0', color: 'white', textShadow: '0 0 10px #fff', fontSize: '50px' }}>
+                        Body Mass Index
+                    </h2>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', width: '300px' }}>
+                            <h2 style={{ textAlign: 'center', margin: '0 0 20px 0', padding: '0', color: 'white', textShadow: '0 0 10px #fff', fontSize: '30px' }}>
+                                Login
+                            </h2>
+                            <input
+                                type="text"
+                                placeholder="Username"
+                                style={styles.input}
+                            />
+                            <input
+                                type="password"
+                                placeholder="Password"
+                                style={styles.input}
+                            />
+                            <button type="submit" style={styles.button}>
+                                Login
+                            </button>
+                        </div>
+                    </div>
+                    <div className="row" style={{ display: 'flex', margin: '0 0 20px 0', padding: '0', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+                        <p>
+                            Don't have an account?
+                            <button type="submit" style={{ margin: '0 0 0 10px', padding: '0', color: 'white', border: 'none', backgroundColor: 'transparent', fontSize: '16px' }} onClick={() => navigate('/signup')}>
+                                Signup
+                            </button>
+                        </p>
+                    </div>
+                </div>
+            </div>
     </section>
   );
 };
