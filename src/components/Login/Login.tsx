@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { invoke } from "@tauri-apps/api/tauri";
 
-import "../App.css"
+import "../../App.css"
 
 const styles: { [key: string]: React.CSSProperties } = {
   container: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' },
@@ -14,37 +14,14 @@ const styles: { [key: string]: React.CSSProperties } = {
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleUsernameChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
-    // if (event.target.value.length > 12) {
-    //   alert("Username must be less than 12 characters.");
-    //   return;
-    // } else if (event.target.value.length < 3) {
-    //   alert("Username must be at least 3 characters.");
-    //   return;
-    // } else if (!/^[a-zA-Z0-9]+$/.test(event.target.value)) {
-    //   alert("Username must only contain alphanumeric characters.");
-    //   return;
-    // } else if (event.target.value.includes(" ")) {
-    //   alert("Username must not contain spaces.");
-    //   return;
-    // } else if (event.target.value.includes("admin")) {
-    //   alert("Username must not contain the word 'admin'.");
-    //   return;
-    // } else if (event.target.value.includes("user")) {
-    //   alert("Username must not contain the word 'user'.");
-    //   return;
-    // } else if (event.target.value.includes("root")) {
-    //   alert("Username must not contain the word 'root'.");
-    //   return;
-    // } else if (event.target.value.includes("super")) {
-    //   alert("Username must not contain the word 'super'.");
-    //   return;
-    // }
-    // } else {
     setUsername(event.target.value);
-    // }
   };
 
   const handlePasswordChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
@@ -55,13 +32,18 @@ const LoginPage = () => {
     event.preventDefault();
     
     // Implement your login logic here.
-    const isSuccess = await performLogin(username, password); // Replace this with your actual login logic.
-
+    // Replace this with your actual login logic.
+    
+    const isSuccess = await performLogin(username, password);
+    
+    
     // If login is successful, redirect to the homepage.
     if (isSuccess) {
       navigate("/home?username=" + username);
     } else {
-      alert("Login failed. Please try again.");
+      // Otherwise, display an error message.
+      setIsError(true);
+      setErrorMessage("Login failed. Please try again.");
     }
   };
 
@@ -93,13 +75,17 @@ const LoginPage = () => {
                                 type="text"
                                 placeholder="Username"
                                 style={styles.input}
+                                onChange={handleUsernameChange}
+                                required
                             />
                             <input
                                 type="password"
                                 placeholder="Password"
                                 style={styles.input}
+                                onChange={handlePasswordChange}
+                                required
                             />
-                            <button type="submit" style={styles.button}>
+                            <button type="submit" style={styles.button} onClick={handleSubmit}>
                                 Login
                             </button>
                         </div>
@@ -112,6 +98,8 @@ const LoginPage = () => {
                             </button>
                         </p>
                     </div>
+
+                    {isError && <div style={{ color: 'red' }}>{errorMessage}</div>}
                 </div>
             </div>
     </section>
@@ -119,3 +107,4 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+

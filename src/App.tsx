@@ -5,11 +5,11 @@ import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 // import { useCookies } from "react-cookie";
-import StartPage from "./components/Start";
-import SignupPage  from "./components/Signup";
-import LoginPage from "./components/Login";
-import LogoutPage from "./components/Logout";
-import HomePage from "./components/Home";
+import StartPage from "./components/LandingPage/LandingPage";
+import SignupPage  from "./components/Signup/Signup";
+import LoginPage from "./components/Login/Login";
+import LogoutPage from "./components/Logout/Logout";
+import HomePage from "./components/Home/Home";
 
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";

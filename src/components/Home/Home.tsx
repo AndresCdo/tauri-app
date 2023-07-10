@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import reactLogo from "../assets/react.svg";
+import React, { useState , useEffect } from "react";
+import reactLogo from "../../assets/react.svg";
 import { invoke } from "@tauri-apps/api/tauri";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
-import "../App.css"
+import "../../App.css"
 
 const styles: { [key: string]: React.CSSProperties } = {
   container: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' },
@@ -28,6 +28,12 @@ const HomePage = () => {
   const [height, setHeight] = useState("");
   const [bmi, setBmi] = useState("");
   
+  useEffect(() => {
+    if (username) {
+      setName(username);
+    }
+  }, [username]);
+
   async function greet() {
     //     // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
         setGreetMsg(await invoke("greet", { name }));
@@ -38,7 +44,7 @@ const HomePage = () => {
         setGreetMsg(await invoke("greet", { name }));
         setBmi(await invoke("bmi", { weight, height, name }));
       }
-
+  
   return(
     <section>
       <div className='air air1'></div>
@@ -48,11 +54,9 @@ const HomePage = () => {
 
       <div style={styles.container}>
         <div className='col-md-6' style={{ display: 'flex', flexDirection: 'column', width: '700px', justifyContent: 'center', alignItems: 'center' }}>
-          <h1 
-            style={styles.heading}
-          >
-            Welcome to Body Mass Index Calculator!
-          </h1>
+          <h2 style={{ textAlign: 'center', margin: '0 0 20px 0', padding: '0', color: 'white', textShadow: '0 0 5px #fff', fontSize: '50px' }}>
+              Body Mass Index Calculator
+          </h2>
           
           <div className="row">
             <a href="https://vitejs.dev" target="_blank">
@@ -67,15 +71,18 @@ const HomePage = () => {
           </div>
 
           <div className="col-6" style={styles.column}>
-            
             <div className="col-6" style={styles.column}>
               <input
+                required
+                style={styles.input}
                 type="text"
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
                 placeholder="Your weight"
               />
               <input
+                required
+                style={styles.input}
                 type="text"
                 value={height}
                 onChange={(e) => setHeight(e.target.value)}
@@ -85,11 +92,11 @@ const HomePage = () => {
             </div>
           </div>
 
-
-
-          <div className="row" >
-            <h3>{ greetMsg }</h3>
-            <h3>{ bmi }</h3>
+          <div className="col-md-6" style={styles.column}>
+            <p style={{ textAlign: 'center', margin: '0 0 20px 0', padding: '0' }}
+            >{ greetMsg }</p>
+            <p style={{ textAlign: 'center', margin: '0 0 20px 0', padding: '0' }} 
+            >{ bmi }</p>
           </div>
 
           <div className="row">

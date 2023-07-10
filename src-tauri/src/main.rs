@@ -1,8 +1,16 @@
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+#![cfg_attr(not(debug_assertions), windows_subsystem = "linux")]
+mod crypto;
 use std::{fs::{self, File, read}, collections::HashMap, io::{self, Write, Read}, path::{Path, self}, f32::consts::E};
 use serde::{Serialize, Deserialize};
+use keyring;
+use std::error::Error;
+use std::str::from_utf8;
+use base64::{encode};
+use relative_path::RelativePath;
 
-#[derive(Serialize, Deserialize, Debug)]
+const APP_DATA_PATH: &str = "~/tauri-app/";
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct User {
     username: String,
     password: String,
@@ -21,13 +29,17 @@ struct SessionData {
     state: State,
 }
 
-fn save_user(user: User) -> Result<(), Box<dyn std::error::Error>> {
-    let mut users = match read_users_from_file("users.json") {
+fn save_user(_user: User) -> Result<(), Box<dyn std::error::Error>> {
+    let mut users: HashMap<String, User> = match read_users_from_file("users.json") {
         Ok(users) => users,
         Err(_) => HashMap::new(),
     };
-    users.insert(user.username.clone(), user);
+
+    users.insert(_user.username.clone(), _user.clone());
     let users_json = serde_json::to_string(&users)?;
+    
+
+
     let mut file = fs::File::create("users.json")?;
     file.write_all(users_json.as_bytes())?;
     Ok(())
@@ -36,7 +48,7 @@ fn save_user(user: User) -> Result<(), Box<dyn std::error::Error>> {
 fn read_users_from_file(path: &str ) -> Result<HashMap<String, User>, Box<dyn std::error::Error>> {
     if !Path::new(path).exists() {
         let mut file = File::create(path)?;
-        let users = HashMap::new();
+        let users:HashMap<String, User> = HashMap::new();
         let users_json = serde_json::to_string(&users)?;
         file.write_all(users_json.as_bytes())?;
         return Ok(users);
@@ -44,32 +56,69 @@ fn read_users_from_file(path: &str ) -> Result<HashMap<String, User>, Box<dyn st
         let mut file = File::open(path)?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
-        let users: HashMap<String, User> = serde_json::from_str(&contents)?;
+        let users:HashMap<String, User> = serde_json::from_str(&contents)?;
         return Ok(users);
     }
 }
 
 fn is_user_allowed_to_login(username: &str, password: &str) -> Result<bool, Box<dyn std::error::Error>> {
-    let users = read_users_from_file("users.json")?;
+    let users = read_users_from_file("~/tauri-app/users.json")?;
     match users.get(username) {
         Some(user) => Ok(user.is_allowed && user.password == password),
         None => Ok(false),
     }
 }
 
+// fn storage_password(service: &str, username: &str, password: &str) -> Result<(), Box<dyn Error>> {
+//     let keyring = keyring::Entry::new(service, username);
+//     keyring.storage_password(service, username, password)?;
+//     Ok(())
+// }
+
+// fn verify_password(service: &str, username: &str, password: &str) -> Result<(), Box<dyn Error>> {
+//     let keyring = Keyring::new(service, username);
+//     let stored_password = keyring.get_password()?;
+
+//     if stored_password != password {
+//         return Err("Password does not match".into());
+//     }
+//     Ok(())
+// }
 
 #[tauri::command]
 fn signup(username: String, password: String) -> bool {
-    let user = User { username, password, is_allowed: true };
-    save_user(user).is_ok()
+    let user = User { username: username.clone() , password, is_allowed: true };
+    if let Ok(encrypted_bytes) = crypto::encrypt(&user.password) {
+        let user = User { username: username.clone(), password: encode(&encrypted_bytes), is_allowed: true };
+        if let Ok(_) = save_user(user) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
 }
 
 #[tauri::command]
 fn login(username: String, password: String) -> bool {
-    let user = User { username, password, is_allowed: true };
-    let users = read_users_from_file("users.json");
-    if let Some(user) = users.unwrap().get(&user.username) {
-        return user.password == user.password;
+    // Check if the file exists and create it if it doesn't
+    if let Ok(users) = read_users_from_file("users.json") {
+        if let Some(user) = users.get(&username) {
+
+            if let Ok(decrypted_password) = crypto::decrypt(&user.password) {
+                // if decrypted_password == password {
+                //     return true;
+                // } else {
+                //     return false;
+                // }
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     } else {
         return false;
     }
@@ -97,7 +146,10 @@ fn login(username: String, password: String) -> bool {
 
 #[tauri::command]
 fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust! ", name)
+    if name.is_empty() {
+        return "Hello, World! You've been greeted from Rust!".to_string();
+    }
+    format!("Hello, {}! You've been greeted from Rust!\n", name)
 }
 
 #[tauri::command]
